@@ -5,7 +5,7 @@
         <div class="row">
             
             @foreach ($posts as $post)
-                @include("posts._post", ['post' => $post])
+                @include("pages.posts._post", ['post' => $post])
             @endforeach
 
         </div>

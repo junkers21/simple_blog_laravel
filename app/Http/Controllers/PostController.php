@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use Illuminate\Http\Request;
+use App\Http\Requests\PostRequest;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -13,7 +14,7 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::all();
-        return view("posts.index", ['posts' => $posts]);
+        return view("pages.posts.index", ['posts' => $posts]);
     }
 
     /**
@@ -21,15 +22,24 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        $post = new Post();
+        return view("pages.posts.create", ['post' => $post]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PostRequest $request)
     {
-        //
+        $validated = $request->validated();        
+
+        if ($request->hasFile('image_path')) {
+           $filePath = Storage::disk('public')->put('images/posts', request()->file('image_path'));
+           $validated['image_path'] = $filePath;
+       }
+
+        Post::create($validated);
+        return redirect('/');
     }
 
     /**
@@ -37,7 +47,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return view("pages.posts.show", ['post' => $post]);
     }
 
     /**
@@ -45,15 +55,24 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        return view("pages.posts.edit", ['post' => $post]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(PostRequest $request, Post $post)
     {
-        //
+        $validated = $request->validated();        
+
+        if ($request->hasFile('image_path')) {
+           $filePath = Storage::disk('public')->put('images/posts', request()->file('image_path'));
+           $validated['image_path'] = $filePath;
+       }
+
+        $post->update($validated);
+
+        return redirect('/');
     }
 
     /**
@@ -61,6 +80,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        $post->delete();
+        return redirect('/')->withSuccess(__('Post delete successfully.'));
     }
 }
